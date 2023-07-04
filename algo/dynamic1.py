@@ -51,6 +51,7 @@ def dinamic_knackpack_matrix(num_element:int,capacity:int,values:list,weights:li
     #definiamo un array di zeri su cui lavorare, grande qaundo la capacità dello zaino
     #corrisponde al primo ciclo di definizionde dello pseudo codice
     z = np.zeros((num_element,capacity+1))    
+    a = np.zeros((num_element,capacity+1))
     
     #per ogni elemento che possiamo aggiungere nello zaino
     for j in range(0,num_element):
@@ -63,15 +64,19 @@ def dinamic_knackpack_matrix(num_element:int,capacity:int,values:list,weights:li
         for d in range(weights[j],capacity+1):
             if(z[j-1,d-weights[j]] + values[j] > z[j-1,d]):
                 z[j,d] = z[j-1,d-weights[j]] + values[j]
+                a[j,d] = 1
             else:
                 z[j,d] = z[j-1,d]
+                a[j,d] = 0
     
     z_star = z[num_element-1,capacity]
-    return z,z_star
+    print("Massimo ottenibile: ",z_star)
+    print("Matrice dei valori: \n",z)
+    print("Matrice di pick: \n",a)
 
 #main
 if __name__ == "__main__":
-    print(dinamic_knackpack_matrix(3,10,[10,20,30],[3,3,3]))
+    dinamic_knackpack_matrix(3,10,[10,20,30],[3,3,3])
         
             
 
