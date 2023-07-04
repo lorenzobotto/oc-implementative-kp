@@ -74,6 +74,24 @@ def dinamic_knackpack_matrix(num_element:int,capacity:int,values:list,weights:li
     print("Matrice dei valori: \n",z)
     print("Matrice di pick: \n",a)
 
+    
+def dinamic_knackpack_single_list(num_element:int,capacity:int,values:list,weights:list):
+    #definisco l'array di partenza
+    z = np.zeros(capacity+1)
+
+    #per ogni possibile elemento nello zaino
+    for j in range(0,num_element):
+        #parto dalla capacità e vado fino al peso dell'elemento
+        for d in range(capacity,weights[j],-1):
+            #se il peso dell'elemento è minore della capacità quindi ce posto per lui nello zaino
+            if z[d-weights[j]] + values[j] > z[d]:
+                #se il valore dello zaino meno il peso dell'elemento più il valore dell'elemento è maggiore dello zaino
+                z[d] = z[d-weights[j]] + values[j]
+
+    z_star = z[capacity]
+    print("Massimo ottenibile: ",z_star)
+    print("Matrice dei valori: \n",z)
+
 #main
 if __name__ == "__main__":
     dinamic_knackpack_matrix(3,10,[10,20,30],[3,3,3])
