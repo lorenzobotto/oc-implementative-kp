@@ -26,13 +26,13 @@ class Knapsack:
 			group.append((self.profits[i]/self.weights[i],self.profits[i],self.weights[i]))
 		group.sort(key=lambda x:x[0],reverse=True)
 		
-		print(group)
+		# print(group)
 		for i in range(self.nb_items):
 			self.profits[i] = group[i][1]
 			self.weights[i] = group[i][2]
 
 
-	def dinamic_knackpack_matrix(self):
+	def dinamic_knapsack_matrix(self):
 
 		num_element = len(self.profits)
 
@@ -59,17 +59,18 @@ class Knapsack:
 		
 
 		z_star = z[num_element-1,self.capacity]
-		print("Massimo ottenibile: ",z_star)
-		print("Matrice dei valori: \n",z)
-		print("Matrice di pick: \n",a)
-		return {"z_star":z_star,"z":z,"a":a}
+		# print("Massimo ottenibile: ",z_star)
+		# print("Matrice dei valori: \n",z)
+		# print("Matrice di pick: \n",a)
+		return {"z_star":z_star,"z":z.tolist(),"a":a.tolist()}
 
-	def dinamic_knackpack_single_list(self):
+	def dinamic_knapsack_single_list(self):
 
 		memory = []
 
 		#definisco l'array di partenza
-		z = np.zeros(self.capacity+1)
+		# z = np.zeros(self.capacity+1)
+		z = [0]*(self.capacity+1)
 
 		#per ogni possibile elemento nello zaino
 		for j in range(0,self.nb_items):
@@ -83,8 +84,8 @@ class Knapsack:
 			memory.append(z.copy())
 
 		z_star = z[self.capacity]
-		print("Massimo ottenibile: ",z_star)
-		print("Matrice dei valori: \n",z)
+		# print("Massimo ottenibile: ",z_star)
+		# print("Matrice dei valori: \n",z)
 		return {"z_star":z_star,"memory":memory}
 
 	"""
@@ -135,9 +136,11 @@ class Knapsack:
 		memory = []
 
 		#inizializzo la lista di elementi scelti
-		X = np.zeros(self.capacity+1)
+		# X = np.zeros(self.capacity+1)
+		X = [0]*(self.capacity+1)
 		#inizializzo la lista di profitti
-		P = np.zeros(self.capacity+1)
+		# P = np.zeros(self.capacity+1)
+		P = [0]*(self.capacity+1)
 		
 
 		#inizio mettendo 0 fino a che il primo elemento non possa stare nello zaino
@@ -171,8 +174,7 @@ class Knapsack:
 			z = P[sum(self.weights)]
 		else:
 			z = P[self.capacity]
-		print("Massimo ottenibile: ",z)
-		print("Matrice dei valori: \n",P)
-		print("Matrice di pick: \n",X)
+		# print("Massimo ottenibile: ",z)
+		# print("Matrice dei valori: \n",P)
+		# print("Matrice di pick: \n",X)
 		return {"z_star":z,"memory":memory}
-		
