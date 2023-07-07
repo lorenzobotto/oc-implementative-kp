@@ -5,12 +5,11 @@ class Knapsack:
 	def __init__(self, capacity=0, profits=[], weights=[]):
 		""" Knapsack class for solving a knapsack problem.
 
-		Attributes:
-			profits (list of non-negative floats): profits of items
-			weights (list of positive floats): weights of items
-			nb_items (int): number of items
-			ids: (list of ints): ids of items
-			capacity (float): capacity of knapsack
+		Attributi:
+			profitti (elenco di variabili non negative): profitti deglie elementi 
+			pesi (elenco di variabili positive): pesi degli elementi
+			nb_items (int): numero di elementi
+			capacità (float): capacità dello zaino
 		"""
 		self.profits = profits
 		self.weights = weights
@@ -19,18 +18,19 @@ class Knapsack:
 
 
 	def sort_by_ratio(self):
-		"""Function to sort item indexes by their ratios profit/weight in a
-		descending order.
-
-		Args:
-			None
-
-		Returns:
-			sorted (list of ints): item_ids sorted by profit/weight in a
-									descending order
 		"""
-		self.ids = sorted(self.ids, key=lambda i: self.profits[i]/self.weights[i],
-						reverse=True)
+		Funzione che organizza i valori in base al loro rapporto profitto/peso
+		"""
+		group = []
+		for i in range(self.nb_items):
+			group.append((self.profits[i]/self.weights[i],self.profits[i],self.weights[i]))
+		group.sort(key=lambda x:x[0],reverse=True)
+		
+		print(group)
+		for i in range(self.nb_items):
+			self.profits[i] = group[i][1]
+			self.weights[i] = group[i][2]
+
 
 	def dinamic_knackpack_matrix(self):
 
@@ -62,34 +62,117 @@ class Knapsack:
 		print("Massimo ottenibile: ",z_star)
 		print("Matrice dei valori: \n",z)
 		print("Matrice di pick: \n",a)
+		return {"z_star":z_star,"z":z,"a":a}
 
 	def dinamic_knackpack_single_list(self):
 
-		num_element = len(self.profits)
+		memory = []
+
 		#definisco l'array di partenza
 		z = np.zeros(self.capacity+1)
 
 		#per ogni possibile elemento nello zaino
-		for j in range(0,num_element):
+		for j in range(0,self.nb_items):
 			#parto dalla capacità e vado fino al peso dell'elemento
-			for d in range(self.capacity,self.weights[j],-1):
+			for d in range(self.capacity,self.weights[j]-1,-1):
 				#se il peso dell'elemento è minore della capacità quindi ce posto per lui nello zaino
 				if z[d-self.weights[j]] + self.profits[j] > z[d]:
 					#se il valore dello zaino meno il peso dell'elemento più il valore dell'elemento è maggiore dello zaino
 					z[d] = z[d-self.weights[j]] + self.profits[j]
+			#aggiungo la lista di valori alla memoria cosi da passarla al front end
+			memory.append(z.copy())
 
 		z_star = z[self.capacity]
 		print("Massimo ottenibile: ",z_star)
 		print("Matrice dei valori: \n",z)
+		return {"z_star":z_star,"memory":memory}
+
+	"""
+	Input:
+	v = il peso che attualmente abbiamo nello zaino
+	P = la lista di profitti aggiornata
+	X = la lista di elementi aggiornata
+	w_m = il peso considerato nello stato attuale
+	p_m = il profitto considerato nello stato attuale
+	"""
+	def rec1(self,v:int,P:list,X:list,w_m:int,p_m:int):
+		# in pratica per ogni peso succesivo al primo
+		if v < self.capacity:
+				u = v
+				#ricalcoliamo v per lo stato corrente
+				v = min(v+w_m,self.capacity)
+				#partedo dalla posizione subito successiva a quella del pese precedente
+				#fino alla posizione v che considera la posizione aggiornata con il nuovo peso
+				for c_cap in range(u+1,v+1):
+					#Aggiorno il profitto
+					P[c_cap] = P[u]
+					#Aggiorno la lista di elementi
+					X[c_cap] = 1
+		#passo ricorsivo che corrisponde allas formula di ricorsine di bellman
+		for c_cap in range(v,w_m,-1):
+			#se il profitto è minore del profitto precedente più il profitto dell'elemento
+			if P[c_cap] < P[c_cap-w_m] + p_m:
+				#aggiorno il profitto
+				P[c_cap] = P[c_cap-w_m] + p_m
+				#aggiorno la lista di elementi
+				X[c_cap] = 1
+		return v,P,X
+		
+
+	"""
+	Input
+	del numero di elementi -> che è nb_items
+	del peso massimo -> che è la capacità
+	della lista di profitti -> che è self.profits
+	della lista di pesi -> che è self.weights
+
+	Output
+	il valore massimo ottenibile -> che è z_star
+	la lista di elementi scelti -> che è X_cap
+	"""
+	def dp1(self):
+
+		memory = []
+
+		#inizializzo la lista di elementi scelti
+		X = np.zeros(self.capacity+1)
+		#inizializzo la lista di profitti
+		P = np.zeros(self.capacity+1)
+		
+
+		#inizio mettendo 0 fino a che il primo elemento non possa stare nello zaino
+		for c_cap in range(0,self.weights[0]):
+			#metto a 0 il profitto 
+			P[c_cap] = 0
+			#metto a 0 la lista di elementi scelti
+			X[c_cap] = 0
+
+		#sarebbe il peso corrente che porta lo zaino
+		v = self.weights[0]
+		#setto il profitto del primo elemento da quando ci sta nello zaino
+		P[v] = self.profits[0]
+		#setto a 1 la lista di elementi scelti
+		X[v] = 1
+
+		#aggiungo la lista di valori alla memoria cosi da passarla al front end
+		memory.append(P.copy())
+
+		#per ogni elemento che posso mettere nello zaino
+		for m in range(1,self.nb_items):
+			#richiamo la funzione ricorsiva
+			v,P,X = self.rec1(v,P,X,self.weights[m],self.profits[m])
+
+			#aggiungo la lista di valori alla memoria cosi da passarla al front end
+			memory.append(P.copy())
 
 
-#main 
-if __name__ == "__main__":
-	
-    capacity = 15
-    weights = [5, 10, 9, 8]
-    profits = [7, 5, 10,6]
 
-    my_knapsack1 = Knapsack(capacity, profits, weights)
-    my_knapsack1.dinamic_knackpack_matrix()
-    my_knapsack1.dinamic_knackpack_single_list()
+		if (sum(self.weights) < self.capacity):
+			z = P[sum(self.weights)]
+		else:
+			z = P[self.capacity]
+		print("Massimo ottenibile: ",z)
+		print("Matrice dei valori: \n",P)
+		print("Matrice di pick: \n",X)
+		return {"z_star":z,"memory":memory}
+		
