@@ -23,16 +23,15 @@ class Knapsack:
 		"""
 		group = []
 		for i in range(self.nb_items):
-			group.append((self.profits[i]/self.weights[i],self.profits[i],self.weights[i]))
+			group.append((int(self.profits[i])/int(self.weights[i]),int(self.profits[i]),int(self.weights[i])))
 		group.sort(key=lambda x:x[0],reverse=True)
 		
-		# print(group)
+		print(group)
 		for i in range(self.nb_items):
 			self.profits[i] = group[i][1]
 			self.weights[i] = group[i][2]
 
-
-	def dinamic_knapsack_matrix(self):
+	def dinamic_knackpack_matrix(self):
 
 		num_element = len(self.profits)
 
@@ -59,18 +58,20 @@ class Knapsack:
 		
 
 		z_star = z[num_element-1,self.capacity]
-		# print("Massimo ottenibile: ",z_star)
-		# print("Matrice dei valori: \n",z)
-		# print("Matrice di pick: \n",a)
-		return {"z_star":z_star,"z":z.tolist(),"a":a.tolist()}
+		print("Massimo ottenibile: ",z_star)
+		print("Matrice dei valori: \n",z)
+		print("Matrice di pick: \n",a)
+		return {"z_star":z_star,"z":z,"a":a}
 
-	def dinamic_knapsack_single_list(self):
+	def dinamic_knackpack_single_list(self):
 
 		memory = []
 
+		b = 2
+		X = 1
+
 		#definisco l'array di partenza
-		# z = np.zeros(self.capacity+1)
-		z = [0]*(self.capacity+1)
+		z = np.zeros(self.capacity+1)
 
 		#per ogni possibile elemento nello zaino
 		for j in range(0,self.nb_items):
@@ -84,8 +85,8 @@ class Knapsack:
 			memory.append(z.copy())
 
 		z_star = z[self.capacity]
-		# print("Massimo ottenibile: ",z_star)
-		# print("Matrice dei valori: \n",z)
+		print("Massimo ottenibile: ",z_star)
+		print("Matrice dei valori: \n",z)
 		return {"z_star":z_star,"memory":memory}
 
 	"""
@@ -96,7 +97,7 @@ class Knapsack:
 	w_m = il peso considerato nello stato attuale
 	p_m = il profitto considerato nello stato attuale
 	"""
-	def rec1(self,v:int,P:list,X:list,w_m:int,p_m:int):
+	def rec1(self,v:int,P:list,X:list,w_m:int,p_m:int,b:int):
 		# in pratica per ogni peso succesivo al primo
 		if v < self.capacity:
 				u = v
@@ -108,7 +109,7 @@ class Knapsack:
 					#Aggiorno il profitto
 					P[c_cap] = P[u]
 					#Aggiorno la lista di elementi
-					X[c_cap] = 1
+					#X[c_cap] = X[u]	
 		#passo ricorsivo che corrisponde allas formula di ricorsine di bellman
 		for c_cap in range(v,w_m,-1):
 			#se il profitto è minore del profitto precedente più il profitto dell'elemento
@@ -116,7 +117,10 @@ class Knapsack:
 				#aggiorno il profitto
 				P[c_cap] = P[c_cap-w_m] + p_m
 				#aggiorno la lista di elementi
-				X[c_cap] = 1
+				#X[c_cap] = X[c_cap-w_m] + b
+				X = X + b
+
+		b = 2*b
 		return v,P,X
 		
 
@@ -136,11 +140,10 @@ class Knapsack:
 		memory = []
 
 		#inizializzo la lista di elementi scelti
-		# X = np.zeros(self.capacity+1)
-		X = [0]*(self.capacity+1)
+		X = 1
 		#inizializzo la lista di profitti
-		# P = np.zeros(self.capacity+1)
-		P = [0]*(self.capacity+1)
+		P = np.zeros(self.capacity+1)
+		b = 2
 		
 
 		#inizio mettendo 0 fino a che il primo elemento non possa stare nello zaino
@@ -148,14 +151,14 @@ class Knapsack:
 			#metto a 0 il profitto 
 			P[c_cap] = 0
 			#metto a 0 la lista di elementi scelti
-			X[c_cap] = 0
+			#X[c_cap] = 0
 
 		#sarebbe il peso corrente che porta lo zaino
 		v = self.weights[0]
 		#setto il profitto del primo elemento da quando ci sta nello zaino
 		P[v] = self.profits[0]
 		#setto a 1 la lista di elementi scelti
-		X[v] = 1
+		#X[v] = 1
 
 		#aggiungo la lista di valori alla memoria cosi da passarla al front end
 		memory.append(P.copy())
@@ -163,18 +166,19 @@ class Knapsack:
 		#per ogni elemento che posso mettere nello zaino
 		for m in range(1,self.nb_items):
 			#richiamo la funzione ricorsiva
-			v,P,X = self.rec1(v,P,X,self.weights[m],self.profits[m])
+			v,P,X = self.rec1(v,P,X,self.weights[m],self.profits[m],b)
 
 			#aggiungo la lista di valori alla memoria cosi da passarla al front end
 			memory.append(P.copy())
-
-
 
 		if (sum(self.weights) < self.capacity):
 			z = P[sum(self.weights)]
 		else:
 			z = P[self.capacity]
-		# print("Massimo ottenibile: ",z)
-		# print("Matrice dei valori: \n",P)
-		# print("Matrice di pick: \n",X)
-		return {"z_star":z,"memory":memory}
+		print("Massimo ottenibile: ",z)
+		print("Matrice dei valori: \n",P)
+		list_bin = list(bin(X))[2:]
+		list_bin.reverse()
+		print("pick: \n",list_bin)
+		pick = [ i for i in range(len(list_bin)) if list_bin[i] == '1']
+		return {"z_star":z,"memory":memory,"pick":list_bin,"elements picked": [ i for i in range(len(list_bin)) if list_bin[i] == '1']}
