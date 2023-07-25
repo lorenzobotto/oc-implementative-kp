@@ -26,7 +26,7 @@ class Knapsack:
 			group.append((int(self.profits[i])/int(self.weights[i]),int(self.profits[i]),int(self.weights[i])))
 		group.sort(key=lambda x:x[0],reverse=True)
 		
-		print(group)
+		# print(group)
 		for i in range(self.nb_items):
 			self.profits[i] = group[i][1]
 			self.weights[i] = group[i][2]
@@ -62,6 +62,24 @@ class Knapsack:
 		print("Matrice dei valori: \n",z)
 		print("Matrice di pick: \n",a)
 		return {"z_star":z_star,"z":z,"a":a}
+	
+	def _pick_matrix_for_iterative_dp2(self, c: int, n_items: int, memory: list):
+		"""
+		Funzione che ritorna la lista di elementi scelti per ogni iterazione della funzione dp2
+		"""
+		X = [0]*n_items
+		index = c
+		i = n_items-1
+		while (i>=0):
+			if i == 0:
+				if (memory[i][index] != 0):
+					X[i] = 1
+			else:
+				if (memory[i-1][index] != memory[i][index]):
+					X[i] = 1
+					index = index - self.weights[i]
+			i = i-1
+		return X
 
 	def dinamic_knackpack_single_list(self):
 
@@ -85,9 +103,10 @@ class Knapsack:
 			memory.append(z.copy())
 
 		z_star = z[self.capacity]
-		print("Massimo ottenibile: ",z_star)
-		print("Matrice dei valori: \n",z)
-		return {"z_star":z_star,"memory":memory}
+		a = self._pick_matrix_for_iterative_dp2(self.capacity, self.nb_items, memory)
+		# print("Massimo ottenibile: ",z_star)
+		# print("Matrice dei valori: \n",z)
+		return {"z_star":z_star,"memory":memory, "a": a}
 
 	"""
 	Input:
