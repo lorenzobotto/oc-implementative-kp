@@ -6,6 +6,7 @@ import {FaThList} from 'react-icons/fa';
 import Button from 'react-bootstrap/Button';
 import {useState, useRef, useEffect} from 'react';
 import {GrCapacity} from 'react-icons/gr';
+import Alert from 'react-bootstrap/Alert';
 
 function App() {
 
@@ -13,13 +14,14 @@ function App() {
   const [capacity, setCapacity] = useState(0);
   const [table, setTable] = useState([]);
   const [gen_table_disabled, setGenTableDisabled] = useState(true);
-  const [weights] = useState([]);
-  const [profits] = useState([]);
+  const [weights, setWeights] = useState([]);
+  const [profits, setProfits] = useState([]);
   const [rec_dp1, setRecDp1] = useState(true);
   const [it_dp1, setItDp1] = useState(true);
   const [it_dp2, setItDp2] = useState(true);
   const [fetch_results, setFetchResults] = useState({});
   const bottomRef = useRef(null);
+  const [errorFetch, setErrorFetch] = useState(false);
 
   const checkInputs = () => {
     let capacity = document.getElementById('capacity').value;
@@ -72,6 +74,11 @@ function App() {
   function createTable(tableData) {
     let table = [];
     let children = [];
+    let header = [];
+    for (let i = 0; i < tableData.length; i++) {
+      header.push(<th style={{textAlign: 'center'}}>{i}</th>);
+    }
+    table.push(<tr>{header}</tr>);
     for (let i = 0; i < tableData.length; i++) {
       children.push(<td>{tableData[i]}</td>);
     }
@@ -81,6 +88,12 @@ function App() {
 
   function createTable_itdp1(tableData, index_colored) {
     let table = [];
+    let header = [];
+    header.push(<th style={{textAlign: 'center'}}>Item</th>);
+    for (let i = 0; i < tableData[0].length; i++) {
+      header.push(<th style={{textAlign: 'center'}}>{i}</th>);
+    }
+    table.push(<tr>{header}</tr>);
     for (let i = 0; i < tableData.length; i++) {
       let children = [];
       children.push(<td>X{i+1}</td>);
@@ -136,7 +149,12 @@ function App() {
         weights: weights,
         profits: profits
       })
-    }).then(res => res.json())
+    }).then(res => {
+      if (res.ok) {
+        return res.json()
+      }
+      return Promise.reject(res);
+    })
     .then(data => {
       let memory = data['memory'];
       let z_star = data['z_star'];
@@ -151,8 +169,19 @@ function App() {
         'pick': data['pick']
       }
       setFetchResults(json_data);
-    }
-    );
+    })
+    .catch(_ => {
+      setErrorFetch(true);
+      setRecDp1(true);
+      setItDp1(true);
+      setItDp2(true);
+      setTimeout(() => {
+        setErrorFetch(false);
+        setRecDp1(false);
+        setItDp1(false);
+        setItDp2(false);
+      }, 3000)
+    });
   }
 
   const dinamic_knapsack_single_list = (capacity, weights, profits) => {
@@ -166,7 +195,12 @@ function App() {
         weights: weights,
         profits: profits
       })
-    }).then(res => res.json())
+    }).then(res => {
+      if (res.ok) {
+        return res.json()
+      }
+      return Promise.reject(res);
+    })
     .then(data => {
       let memory = data['memory'];
       let z_star = data['z_star'];
@@ -181,8 +215,19 @@ function App() {
         'pick': data['pick']
       }
       setFetchResults(json_data);
-    }
-    );
+    })
+    .catch(_ => {
+      setErrorFetch(true);
+      setRecDp1(true);
+      setItDp1(true);
+      setItDp2(true);
+      setTimeout(() => {
+        setErrorFetch(false);
+        setRecDp1(false);
+        setItDp1(false);
+        setItDp2(false);
+      }, 3000)
+    });
   }
 
   const dinamic_knapsack_matrix = (capacity, weights, profits) => {
@@ -196,7 +241,12 @@ function App() {
         weights: weights,
         profits: profits
       })
-    }).then(res => res.json())
+    }).then(res => {
+      if (res.ok) {
+        return res.json()
+      }
+      return Promise.reject(res);
+    })
     .then(data => {
       // I create the resulting two tables from arrays received from the backend
       let a = data['a'];
@@ -222,8 +272,19 @@ function App() {
         'z_star': z_star
       }
       setFetchResults(json_data);
-    }
-    );
+    })
+    .catch(_ => {
+      setErrorFetch(true);
+      setRecDp1(true);
+      setItDp1(true);
+      setItDp2(true);
+      setTimeout(() => {
+        setErrorFetch(false);
+        setRecDp1(false);
+        setItDp1(false);
+        setItDp2(false);
+      }, 3000)
+    });
   }
 
   useEffect(() => {
@@ -267,7 +328,11 @@ function App() {
                       setGenTableDisabled(true);
                     }
                     if (e.target.value > 0) {
-                      setGenTableDisabled(false);
+                      if (table.length === 0) {
+                        setGenTableDisabled(false);
+                      } else {
+                        setGenTableDisabled(true);
+                      }
                     }
                   }}
                 />
@@ -275,13 +340,16 @@ function App() {
             <Button disabled={gen_table_disabled} variant="success" onClick={() => {
               let table = generateTable_wp(n_items);
               setTable(table);
+              setGenTableDisabled(true);
             }}>Generate Table</Button>
             {table.length !== 0 && <div style={{marginTop: '30px'}}>
-              <table className="table table-bordered" id='table_wp'>
-                <tbody>
-                  {table}
-                </tbody>
-              </table>
+              <div className='scrollTable' style={{overflow: 'auto'}}>
+                <table className="table table-bordered" id='table_wp'>
+                  <tbody>
+                    {table}
+                  </tbody>
+                </table>
+              </div>
             </div>}
             {table.length !== 0 && 
               <>
@@ -305,9 +373,14 @@ function App() {
                   setNItems(0);
                   setGenTableDisabled(true);
                   setTable([]);
+                  setWeights([]);
+                  setProfits([]);
                   document.getElementById('capacity').value = '';
                   document.getElementById('n_items').value = '';
                 }}>Clear All</Button>
+                <Alert variant={'danger'} style={{marginTop: '10px'}} show={errorFetch} >
+                  There was an error fetching the results. Please change the weights and profits and try again.
+                </Alert>
               </>
             }
             </Card.Body>
@@ -318,17 +391,21 @@ function App() {
                 <div>
                   <h1 style={{marginBottom: '20px'}}>Result of Iterative DP1</h1>
                   <h3>Picks Table</h3>
-                  <table style={{marginBottom: '30px'}} className="table table-bordered">
-                    <tbody>
-                      {fetch_results['table_a']}
-                    </tbody>
-                  </table>
+                  <div className='scrollTable' style={{overflow: 'auto', marginBottom: '30px'}}>
+                    <table className="table table-bordered">
+                      <tbody>
+                        {fetch_results['table_a']}
+                      </tbody>
+                    </table>
+                  </div>
                   <h3>Values Table</h3>
-                  <table style={{marginBottom: '30px'}} className="table table-bordered">
-                    <tbody>
-                      {fetch_results['table_z']}
-                    </tbody>
-                  </table>
+                  <div className='scrollTable' style={{overflow: 'auto', marginBottom: '30px'}}>
+                    <table className="table table-bordered">
+                      <tbody>
+                        {fetch_results['table_z']}
+                      </tbody>
+                    </table>
+                  </div>
                   <h3>Z*: {fetch_results['z_star']}</h3>
                 </div>
               </Card.Body>
@@ -341,11 +418,13 @@ function App() {
                   {fetch_results['algorithm'] === 'recursive_knapsack' && <h1 style={{marginBottom: '20px'}}>Result of Recursion DP1</h1>}
                   {fetch_results['algorithm'] === 'dinamic_knapsack_single_list' && <h1 style={{marginBottom: '20px'}}>Result of Iterative DP2</h1>}
                   <h3>Table - Iteration {fetch_results['iteration']}</h3>
-                  <table style={{marginBottom: '30px'}} className="table table-bordered">
-                    <tbody>
-                      {fetch_results['table']}
-                    </tbody>
-                  </table>
+                  <div className='scrollTable' style={{overflow: 'auto', marginBottom: '30px'}}>
+                    <table className="table table-bordered">
+                      <tbody>
+                        {fetch_results['table']}
+                      </tbody>
+                    </table>
+                  </div>
                   {fetch_results['iteration'] < fetch_results['memory'].length && 
                     <>
                       <Button variant="success" style={{marginRight: '10px'}} onClick={() => {

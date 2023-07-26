@@ -17,13 +17,18 @@ html, body {
 
 ::-webkit-scrollbar-thumb {
 	background: lightgray;
-	height:20px;
+	height:10px;
 	border-radius: 10px;
 }
   
-::-webkit-scrollbar-corner{
+::-webkit-scrollbar-corner {
 	background: lightgray;
 	border-radius: 10px;
+}
+
+.scrollTable::-webkit-scrollbar {
+  height: 10px;
+  background: transparent;
 }
 
 .App {
@@ -37,6 +42,10 @@ html, body {
 td {
   text-align: center;
   vertical-align: middle;
+}
+
+table {
+  table-layout: auto;
 }
 
 table, th, td {

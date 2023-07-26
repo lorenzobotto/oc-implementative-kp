@@ -15,8 +15,27 @@ class Knapsack:
 		self.weights = weights
 		self.nb_items = len(profits)
 		self.capacity = capacity
+		self.order_profits = [0]*len(profits)
+		self.order_weights = [0]*len(profits)
 
+	def _find_original_position(self,pick:list):
+		original_pick = []
+		for i in range(0,self.nb_items):
+			#per ongi elemento non ordinato
+			weight = self.weights[i]
+			profit = self.profits[i]
+			index = 0
 
+			#cerco indice di stessi pesi stessi valori
+			for j in range(0,self.nb_items):
+				if (weight == self.order_weights[j] and profit == self.order_profits[j]):
+					index = j
+					break
+				
+			original_pick.append(pick[index])
+
+		return original_pick
+	
 	def sort_by_ratio(self):
 		"""
 		Funzione che organizza i valori in base al loro rapporto profitto/peso
@@ -28,12 +47,12 @@ class Knapsack:
 		
 		# print(group)
 		for i in range(self.nb_items):
-			self.profits[i] = group[i][1]
-			self.weights[i] = group[i][2]
+			self.order_profits[i] = group[i][1]
+			self.order_weights[i] = group[i][2]
 
 	def dynamic_knapsack_matrix(self):
 
-		num_element = len(self.profits)
+		num_element = len(self.order_profits)
 
 		#definiamo un array di zeri su cui lavorare, grande qaundo la capacità dello zaino
 		#corrisponde al primo ciclo di definizionde dello pseudo codice
@@ -44,18 +63,21 @@ class Knapsack:
 		for j in range(0,num_element):
 			#vado da 0 al minimo della capacità e del peso dell'elemento -1
 			#in pratica finche lo zaino non è abbastanza grande non metto solo 0
-			for d in range(0,self.weights[j]):
+			for d in range(0,self.order_weights[j]):
 				#quindi assegno il valore precendete finche non ci sta nello zaino
 				z[j,d] = z[j-1,d]
 				#da quando il peso inizia ad avere posto nello zaino
-			for d in range(self.weights[j],self.capacity+1):
-				if(z[j-1,d- self.weights[j]] + self.profits[j] > z[j-1,d]):
-					z[j,d] = z[j-1,d- self.weights[j]] + self.profits[j]
+			for d in range(self.order_weights[j],self.capacity+1):
+				if(z[j-1,d- self.order_weights[j]] + self.order_profits[j] > z[j-1,d]):
+					z[j,d] = z[j-1,d- self.order_weights[j]] + self.order_profits[j]
 					a[j,d] = 1
 				else:
 					z[j,d] = z[j-1,d]
 					a[j,d] = 0
 		
+		X0: 1
+		X1: 0
+		X2: 1
 
 		z_star = z[num_element-1,self.capacity]
 		print("Massimo ottenibile: ",z_star)
@@ -77,7 +99,7 @@ class Knapsack:
 			else:
 				if (memory[i-1][index] != memory[i][index]):
 					X[i] = 1
-					index = index - self.weights[i]
+					index = index - self.order_weights[i]
 			i = i-1
 		return X
 
@@ -94,11 +116,11 @@ class Knapsack:
 		#per ogni possibile elemento nello zaino
 		for j in range(0,self.nb_items):
 			#parto dalla capacità e vado fino al peso dell'elemento
-			for d in range(self.capacity,self.weights[j]-1,-1):
+			for d in range(self.capacity,self.order_weights[j]-1,-1):
 				#se il peso dell'elemento è minore della capacità quindi ce posto per lui nello zaino
-				if z[d-self.weights[j]] + self.profits[j] > z[d]:
+				if z[d-self.order_weights[j]] + self.order_profits[j] > z[d]:
 					#se il valore dello zaino meno il peso dell'elemento più il valore dell'elemento è maggiore dello zaino
-					z[d] = z[d-self.weights[j]] + self.profits[j]
+					z[d] = z[d-self.order_weights[j]] + self.order_profits[j]
 			#aggiungo la lista di valori alla memoria cosi da passarla al front end
 			memory.append(z.copy())
 
@@ -106,7 +128,7 @@ class Knapsack:
 		a = self._pick_matrix_for_iterative_dp2(self.capacity, self.nb_items, memory)
 		# print("Massimo ottenibile: ",z_star)
 		# print("Matrice dei valori: \n",z)
-		return {"z_star":z_star,"memory":memory, "pick": a}
+		return {"z_star":z_star,"memory":memory, "pick": self._find_original_position(a)}
 
 	"""
 	Input:
@@ -128,7 +150,7 @@ class Knapsack:
 					#Aggiorno il profitto
 					P[c_cap] = P[u]
 					#Aggiorno la lista di elementi
-					#X[c_cap] = X[u]	
+					X[c_cap] = X[u]	
 		#passo ricorsivo che corrisponde allas formula di ricorsine di bellman
 		for c_cap in range(v,w_m,-1):
 			#se il profitto è minore del profitto precedente più il profitto dell'elemento
@@ -136,19 +158,19 @@ class Knapsack:
 				#aggiorno il profitto
 				P[c_cap] = P[c_cap-w_m] + p_m
 				#aggiorno la lista di elementi
-				#X[c_cap] = X[c_cap-w_m] + b
-				X = X + b
+				X[c_cap] = X[c_cap-w_m] + b
+				#X = X + b
 
 		b = 2*b
-		return v,P,X
+		return v,P,X,b
 		
 
 	"""
 	Input
 	del numero di elementi -> che è nb_items
 	del peso massimo -> che è la capacità
-	della lista di profitti -> che è self.profits
-	della lista di pesi -> che è self.weights
+	della lista di profitti -> che è self.order_profits
+	della lista di pesi -> che è self.order_weights
 
 	Output
 	il valore massimo ottenibile -> che è z_star
@@ -159,25 +181,25 @@ class Knapsack:
 		memory = []
 
 		#inizializzo la lista di elementi scelti
-		X = 1
+		X = [0]*(self.capacity+1)
 		#inizializzo la lista di profitti
 		P = [0]*(self.capacity+1)
 		b = 2
 		
 
-		#inizio mettendo 0 fino a che il primo elemento non possa stare nello zaino
-		for c_cap in range(0,self.weights[0]):
-			#metto a 0 il profitto 
-			P[c_cap] = 0
-			#metto a 0 la lista di elementi scelti
-			#X[c_cap] = 0
+		# #inizio mettendo 0 fino a che il primo elemento non possa stare nello zaino
+		# for c_cap in range(0,self.order_weights[0]):
+		# 	#metto a 0 il profitto 
+		# 	P[c_cap] = 0
+		# 	#metto a 0 la lista di elementi scelti
+		# 	X[c_cap] = 0
 
 		#sarebbe il peso corrente che porta lo zaino
-		v = self.weights[0]
+		v = self.order_weights[0]
 		#setto il profitto del primo elemento da quando ci sta nello zaino
-		P[v] = self.profits[0]
+		P[v] = self.order_profits[0]
 		#setto a 1 la lista di elementi scelti
-		#X[v] = 1
+		X[v] = 1
 
 		#aggiungo la lista di valori alla memoria cosi da passarla al front end
 		memory.append(P.copy())
@@ -185,18 +207,23 @@ class Knapsack:
 		#per ogni elemento che posso mettere nello zaino
 		for m in range(1,self.nb_items):
 			#richiamo la funzione ricorsiva
-			v,P,X = self.rec1(v,P,X,self.weights[m],self.profits[m],b)
+			v,P,X,b = self.rec1(v,P,X,self.order_weights[m],self.order_profits[m],b)
 
 			#aggiungo la lista di valori alla memoria cosi da passarla al front end
 			memory.append(P.copy())
 
-		if (sum(self.weights) < self.capacity):
-			z = P[sum(self.weights)]
+		if (sum(self.order_weights) < self.capacity):
+			z = P[sum(self.order_weights)]
+			list_bin = list(bin(X[sum(self.order_weights)]))[2:]
 		else:
 			z = P[self.capacity]
+			list_bin = list(bin(X[self.capacity]))[2:]
+		list_bin.reverse()
+
+		while(len(list_bin)!=self.nb_items):
+			list_bin.append('0')
+
 		print("Massimo ottenibile: ",z)
 		print("Matrice dei valori: \n",P)
-		list_bin = list(bin(X))[2:]
-		list_bin.reverse()
 		print("pick: \n",list_bin)
-		return {"z_star":z,"memory":memory,"pick":[eval(i) for i in list_bin]}
+		return {"z_star":z,"memory":memory,"pick":self._find_original_position([eval(i) for i in list_bin])}
