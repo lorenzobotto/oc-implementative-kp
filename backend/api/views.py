@@ -19,7 +19,7 @@ def recursive_knapsack(request):
     return JsonResponse(content)
 
 @api_view(['POST'])
-def dinamic_knapsack_matrix(request):
+def dynamic_knapsack_matrix(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     capacity = body['capacity']
@@ -27,12 +27,12 @@ def dinamic_knapsack_matrix(request):
     weights = body['weights']
     knapsack = Knapsack(capacity, profits, weights)
     knapsack.sort_by_ratio()
-    content = knapsack.dinamic_knapsack_matrix()
+    content = knapsack.dynamic_knapsack_matrix()
     print(content)
     return JsonResponse(content)
 
 @api_view(['POST'])
-def dinamic_knapsack_single_list(request):
+def dynamic_knapsack_single_list(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     capacity = body['capacity']
@@ -40,6 +40,6 @@ def dinamic_knapsack_single_list(request):
     weights = body['weights']
     knapsack = Knapsack(capacity, profits, weights)
     knapsack.sort_by_ratio()
-    content = knapsack.dinamic_knapsack_single_list()
+    content = knapsack.dynamic_knapsack_single_list()
     print(content)
     return JsonResponse(content)

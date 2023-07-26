@@ -31,7 +31,7 @@ class Knapsack:
 			self.profits[i] = group[i][1]
 			self.weights[i] = group[i][2]
 
-	def dinamic_knackpack_matrix(self):
+	def dynamic_knapsack_matrix(self):
 
 		num_element = len(self.profits)
 
@@ -61,7 +61,7 @@ class Knapsack:
 		print("Massimo ottenibile: ",z_star)
 		print("Matrice dei valori: \n",z)
 		print("Matrice di pick: \n",a)
-		return {"z_star":z_star,"z":z,"a":a}
+		return {"z_star":z_star,"z":z.tolist(),"a":a.tolist()}
 	
 	def _pick_matrix_for_iterative_dp2(self, c: int, n_items: int, memory: list):
 		"""
@@ -81,7 +81,7 @@ class Knapsack:
 			i = i-1
 		return X
 
-	def dinamic_knackpack_single_list(self):
+	def dynamic_knapsack_single_list(self):
 
 		memory = []
 
@@ -89,7 +89,7 @@ class Knapsack:
 		X = 1
 
 		#definisco l'array di partenza
-		z = np.zeros(self.capacity+1)
+		z = [0]*(self.capacity+1)
 
 		#per ogni possibile elemento nello zaino
 		for j in range(0,self.nb_items):
@@ -106,7 +106,7 @@ class Knapsack:
 		a = self._pick_matrix_for_iterative_dp2(self.capacity, self.nb_items, memory)
 		# print("Massimo ottenibile: ",z_star)
 		# print("Matrice dei valori: \n",z)
-		return {"z_star":z_star,"memory":memory, "a": a}
+		return {"z_star":z_star,"memory":memory, "pick": a}
 
 	"""
 	Input:
@@ -161,7 +161,7 @@ class Knapsack:
 		#inizializzo la lista di elementi scelti
 		X = 1
 		#inizializzo la lista di profitti
-		P = np.zeros(self.capacity+1)
+		P = [0]*(self.capacity+1)
 		b = 2
 		
 
@@ -199,5 +199,4 @@ class Knapsack:
 		list_bin = list(bin(X))[2:]
 		list_bin.reverse()
 		print("pick: \n",list_bin)
-		pick = [ i for i in range(len(list_bin)) if list_bin[i] == '1']
-		return {"z_star":z,"memory":memory,"pick":list_bin,"elements picked": [ i for i in range(len(list_bin)) if list_bin[i] == '1']}
+		return {"z_star":z,"memory":memory,"pick":[eval(i) for i in list_bin]}

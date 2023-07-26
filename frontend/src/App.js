@@ -97,12 +97,32 @@ function App() {
     return table;
   }
 
-  function updateTable() {
-    setFetchResults({
-      ...fetch_results,
-      'iteration': fetch_results['iteration'] + 1,
-      'table': createTable(fetch_results['memory'][fetch_results['iteration']])
-    })
+  function updateTable(method) {
+    // Method 0: iteration + 1
+    // Method 1: iteration - 1
+    // Method 2: go to result
+    if (method === 0) {
+      setFetchResults({
+        ...fetch_results,
+        'iteration': fetch_results['iteration'] + 1,
+        'it_matrix': fetch_results['it_matrix'] + 1,
+        'table': createTable(fetch_results['memory'][fetch_results['it_matrix'] + 1])
+      })
+    } else if (method === 1) {
+      setFetchResults({
+        ...fetch_results,
+        'iteration': fetch_results['iteration'] - 1,
+        'it_matrix': fetch_results['it_matrix'] - 1,
+        'table': createTable(fetch_results['memory'][fetch_results['it_matrix'] - 1])
+      })
+    } else {
+      setFetchResults({
+        ...fetch_results,
+        'iteration': fetch_results['memory'].length,
+        'it_matrix': fetch_results['memory'].length - 1,
+        'table': createTable(fetch_results['memory'][fetch_results['memory'].length - 1])
+      })
+    }
   }
 
   const recursiveKnapsack = (capacity, weights, profits) => {
@@ -126,7 +146,9 @@ function App() {
         'memory': memory,
         'table': createTable(memory[0]),
         'iteration': 1,
-        'z_star': z_star
+        'it_matrix': 0,
+        'z_star': z_star,
+        'pick': data['pick']
       }
       setFetchResults(json_data);
     }
@@ -154,7 +176,9 @@ function App() {
         'memory': memory,
         'table': createTable(memory[0]),
         'iteration': 1,
-        'z_star': z_star
+        'it_matrix': 0,
+        'z_star': z_star,
+        'pick': data['pick']
       }
       setFetchResults(json_data);
     }
@@ -323,12 +347,30 @@ function App() {
                     </tbody>
                   </table>
                   {fetch_results['iteration'] < fetch_results['memory'].length && 
-                    <Button variant="success" onClick={() => {
-                        updateTable();
-                      }}>Next Iteration</Button>
+                    <>
+                      <Button variant="success" style={{marginRight: '10px'}} onClick={() => {
+                          updateTable(0);
+                        }}>Next Iteration</Button>
+                      {fetch_results['iteration'] > 1 && <Button variant="success" style={{marginRight: '10px'}} onClick={() => {
+                          updateTable(1);
+                        }}>Previous Iteration</Button>}
+                      <Button variant="success" onClick={() => {
+                          updateTable(2);
+                        }}>Go to result</Button>
+                    </>
                   }
                   {fetch_results['iteration'] === fetch_results['memory'].length && 
-                    <h3>Z*: {fetch_results['z_star']}</h3>
+                    <>
+                      <Button variant="success" style={{marginBottom: '10px'}} onClick={() => {
+                          updateTable(1);
+                        }}>Previous Iteration</Button>
+                      <h3>Z*: {fetch_results['z_star']}</h3>
+                    </>
+                  }
+                  {fetch_results['iteration'] === fetch_results['memory'].length && 
+                    fetch_results['pick'].map((item, index) => {
+                        return <h3>X{index + 1} = {item}</h3>
+                    })
                   }
                 </div>
               </Card.Body>
