@@ -26,7 +26,6 @@ def dynamic_knapsack_matrix(request):
     profits = body['profits']
     weights = body['weights']
     knapsack = Knapsack(capacity, profits, weights)
-    knapsack.sort_by_ratio()
     content = knapsack.dynamic_knapsack_matrix()
     print(content)
     return JsonResponse(content)

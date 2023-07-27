@@ -86,7 +86,7 @@ function App() {
     return table;
   }
 
-  function createTable_itdp1(tableData, index_colored) {
+  function createTable_itdp1(tableData) {
     let table = [];
     let header = [];
     header.push(<th style={{textAlign: 'center'}}>Item</th>);
@@ -98,16 +98,24 @@ function App() {
       let children = [];
       children.push(<td>X{i+1}</td>);
       for (let j = 0; j < tableData[i].length; j++) {
-        if (j === index_colored[i]){
-          children.push(<td style={{border: '2px solid red'}}>{tableData[i][j]}</td>);
-        } else {
           children.push(<td>{tableData[i][j]}</td>);
-        }
       }
       table.push(<tr>{children}</tr>);
     }
 
     return table;
+  }
+
+  function colorCell(index_colored, tableData) {
+    // I color the cells that are in the index_colored array, starting from the last row
+    let j = 0;
+    for (let i = index_colored.length; i > 0; i--) {
+      let row = tableData[i];
+      let cell = row.props.children[index_colored[j] + 1];
+      tableData[i].props.children[index_colored[j]  + 1] = <td style={{border: '2px solid red'}}>{cell.props.children}</td>
+      j++;
+    }
+    return tableData;
   }
 
   function updateTable(method) {
@@ -254,7 +262,7 @@ function App() {
       let z_star = data['z_star'];
 
       let index_colored = [parseInt(capacity)]
-      for (let i = 1; i < a.length; i++) {
+      for (let i = a.length; i > 1; i--) {
         if (a[i-1][index_colored[index_colored.length - 1]] === 1) {
           index_colored.push(index_colored[index_colored.length - 1] - weights[i-1]);
         } else {
@@ -262,13 +270,16 @@ function App() {
         }
       }
 
-      let table_a = createTable_itdp1(a, index_colored);
-      let table_z = createTable_itdp1(z.reverse(), index_colored);
+      let table_a = createTable_itdp1(a);
+      let table_z = createTable_itdp1(z);
+
+      let table_a_colored = colorCell(index_colored, table_a);
+      let table_z_colored = colorCell(index_colored, table_z);
 
       let json_data = {
         'algorithm': 'dinamic_knapsack_matrix',
-        'table_a': table_a,
-        'table_z': table_z,
+        'table_a': table_a_colored,
+        'table_z': table_z_colored,
         'z_star': z_star
       }
       setFetchResults(json_data);
