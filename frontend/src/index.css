@@ -1,0 +1,55 @@
+html {
+	scroll-padding-top: 100px;
+}
+
+html, body {
+	max-width: 100%;
+  overflow-x: hidden;
+	overflow-y: overlay;
+	-webkit-tap-highlight-color: transparent;
+  background-color: rgba(17, 24, 39, 1);
+}
+
+::-webkit-scrollbar {
+	width: 5px;
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: lightgray;
+	height:10px;
+	border-radius: 10px;
+}
+  
+::-webkit-scrollbar-corner {
+	background: lightgray;
+	border-radius: 10px;
+}
+
+.scrollTable::-webkit-scrollbar {
+  height: 10px;
+  background: transparent;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: rgba(17, 24, 39, 1);
+  padding-top: 5%;
+}
+
+td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+table {
+  table-layout: auto;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 5px;
+}
