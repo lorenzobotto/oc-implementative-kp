@@ -262,7 +262,7 @@ function App() {
         }
       }
 
-      let table_a = createTable_itdp1(a.reverse(), index_colored);
+      let table_a = createTable_itdp1(a, index_colored);
       let table_z = createTable_itdp1(z.reverse(), index_colored);
 
       let json_data = {
