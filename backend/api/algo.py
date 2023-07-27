@@ -52,7 +52,7 @@ class Knapsack:
 
 	def dynamic_knapsack_matrix(self):
 
-		num_element = len(self.order_profits)
+		num_element = len(self.profits)
 
 		#definiamo un array di zeri su cui lavorare, grande qaundo la capacità dello zaino
 		#corrisponde al primo ciclo di definizionde dello pseudo codice
@@ -63,21 +63,17 @@ class Knapsack:
 		for j in range(0,num_element):
 			#vado da 0 al minimo della capacità e del peso dell'elemento -1
 			#in pratica finche lo zaino non è abbastanza grande non metto solo 0
-			for d in range(0,self.order_weights[j]):
+			for d in range(0,self.weights[j]):
 				#quindi assegno il valore precendete finche non ci sta nello zaino
 				z[j,d] = z[j-1,d]
 				#da quando il peso inizia ad avere posto nello zaino
-			for d in range(self.order_weights[j],self.capacity+1):
-				if(z[j-1,d- self.order_weights[j]] + self.order_profits[j] > z[j-1,d]):
-					z[j,d] = z[j-1,d- self.order_weights[j]] + self.order_profits[j]
+			for d in range(self.weights[j],self.capacity+1):
+				if(z[j-1,d- self.weights[j]] + self.profits[j] > z[j-1,d]):
+					z[j,d] = z[j-1,d- self.weights[j]] + self.profits[j]
 					a[j,d] = 1
 				else:
 					z[j,d] = z[j-1,d]
 					a[j,d] = 0
-		
-		X0: 1
-		X1: 0
-		X2: 1
 
 		z_star = z[num_element-1,self.capacity]
 		print("Massimo ottenibile: ",z_star)
