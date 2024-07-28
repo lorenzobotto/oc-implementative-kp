@@ -1,5 +1,5 @@
 # oc-implementative-kp
-Implementative of KP problem with React + Django for OC course (Ottimizzazione Combinatoria) - Unito 2023
+Implementation of the KP (Knapsack Problem) using React and Django for the OC Course (Ottimizzazione Combinatoria) - Unito 2023
 
 This project aims to implement the Knapsack Problem (KP) using a modern architecture that combines a React frontend with a Django backend. Three different algorithms have been implemented to solve the problem:
 
